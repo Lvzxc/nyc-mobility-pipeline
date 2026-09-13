@@ -80,7 +80,7 @@ The May 2026 Green Taxi dataset contains 44,921 records and 21 columns.
 - A pickup timestamp from December 31, 2008 is anomalous for a May 2026 dataset.
 - No single-column or tested composite business key is unique.
 
-### Recommended Ingestion Actions
+### To check in Silver Layer
 
 **Before production ingestion:**
 - Investigate the anomalous 2008 timestamp.
