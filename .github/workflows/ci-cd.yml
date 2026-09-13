@@ -1,48 +1,46 @@
 name: NYC Mobility CI/CD
 
 on:
-  push:
-    branches: [main, develop]
-
   pull_request:
     branches: [main, develop]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "docs/**"
+      - ".github/workflows/ci-cd.yml"
+      - ".gitignore"
+
+  push:
+    branches: [main, develop]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "docs/**"
+      - ".github/workflows/ci-cd.yml"
+      - ".gitignore"
 
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# PR runs are collapsed to the newest commit.
+concurrency:
+  group: nyc-mobility-pipeline-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate:
-    name: Validate Project
+    name: Validate repository
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
 
-      - name: Check repository formatting
+      - name: Check whitespace errors
         run: git diff --check
-
-      - name: Check required folders
-        run: |
-          test -d docs
-          test -d src
-          test -d src/sql
-          test -d tests
-          test -d .github/workflows
-
-      - name: Check SQL pipeline folders
-        run: |
-          test -d src/sql/00_setup
-          test -d src/sql/01_bronze_ingest
-          test -d src/sql/02_silver_clean
-          test -d src/sql/03_gold_model
-          test -d src/sql/04_data_quality
-          test -d src/sql/05_analytics
-
-      - name: Check test folders
-        run: |
-          test -d tests/01_source_checks
-          test -d tests/02_clean_checks
-          test -d tests/03_mart_checks
