@@ -52,14 +52,14 @@ scripts/taxi_zones/inspect_taxi_zones.py
 Quality-check script:
 scripts/taxi_zones/quality_check_taxi_zones.py
 
-3. Dataset Size
+## 3. Dataset Size
 
 The downloaded Taxi Zone Lookup Table contains:
 Metric	Result
 Rows	265
 Columns	4
 
-4. Columns and Data Types
+## 4. Columns and Data Types
 
 The dataset contains the following columns:
 
@@ -112,15 +112,15 @@ Airports
 EWR
 N/A in the raw source
 
-5. Data Quality Checks
+## 5. Data Quality Checks
 
-5.1 Duplicate Rows
+## 5.1 Duplicate Rows
 
 Result:
 Duplicate rows: 0
 There are no completely duplicated records.
 
-5.2 Duplicate LocationIDs
+## 5.2 Duplicate LocationIDs
 
 Result:
 Unique LocationIDs: 265
@@ -130,7 +130,7 @@ No duplicate LocationID records were found.
 Because there are 265 rows and 265 unique LocationID values,
 LocationID is a strong candidate key for this lookup table.
 
-5.3 LocationID Range and Sequence
+## 5.3 LocationID Range and Sequence
 
 Observed range:
 Minimum LocationID: 1
@@ -144,7 +144,7 @@ Unexpected IDs: []
 Therefore, the downloaded dataset contains the complete
 LocationID sequence from 1 to 265 with no gaps or unexpected IDs.
 
-5.4 Duplicate Zone Names
+## 5.4 Duplicate Zone Names
 
 There are:
 265 total rows
@@ -164,7 +164,7 @@ Therefore:
 LocationID = key
 Zone        = descriptive attribute
 
-6. Borough Distribution
+## 6. Borough Distribution
 
 The observed borough values are:
 Borough	Count
@@ -182,7 +182,7 @@ Total	265
 LocationID 265. When the CSV is read with pandas' default
 NA parsing, it is interpreted as NaN.
 
-7. Service Zone Distribution
+## 7. Service Zone Distribution
 
 The observed service_zone values are:
 Service Zone	Count
@@ -199,7 +199,7 @@ LocationID 264 and LocationID 265.
 When loaded using pandas' default NA parsing, these values appear
 as NaN.
 
-8. Special Records
+## 8. Special Records
 
 The final two records contain special geographic values.
 
@@ -221,7 +221,7 @@ contain N/A values. Any future transformation or business rule
 for handling these records should be defined in the appropriate
 clean/silver layer.
 
-9. Missing-Value Behavior
+## 9. Missing-Value Behavior
 
 When the CSV is loaded using pandas' default:
 pd.read_csv(FILE_PATH)
@@ -258,7 +258,7 @@ service_zone = N/A
 Therefore, the NaN values observed during normal pandas loading
 are a result of pandas' default NA parsing.
 
-10. Dimensions vs. Measures
+## 10. Dimensions vs. Measures
 
 This dataset is a reference/dimension dataset.
 
@@ -287,7 +287,7 @@ timestamps
 Measures will come from trip-level datasets such as Green Taxi
 trip records and can be aggregated by Taxi Zone using LocationID.
 
-11. Relationship to Green Taxi Trip Records
+## 11. Relationship to Green Taxi Trip Records
 
 The Taxi Zone Lookup Table is used to interpret location IDs in
 NYC TLC trip records.
@@ -340,7 +340,7 @@ This relationship allows trip-level pickup and drop-off IDs to be
 translated into geographic attributes such as borough, zone name,
 and service-zone category.
 
-12. Recommended Data Model Role
+## 12. Recommended Data Model Role
 
 The Taxi Zone Lookup Table should be treated as a dimension/reference
 table in the project's data model.
@@ -361,7 +361,7 @@ service_zone
 LocationID should be used as the key for joining Taxi Zone
 information to trip-level datasets.
 
-13. Relevance to Business Questions
+## 13. Relevance to Business Questions
 
 The Taxi Zone dataset provides geographic context for NYC TLC
 trip records.
@@ -387,7 +387,7 @@ Borough / Zone / service_zone
        ↓
 Aggregate taxi demand
 
-14. Validation Summary
+## 14. Validation Summary
 
 The Taxi Zone CSV was successfully downloaded and validated locally.
 
@@ -410,7 +410,7 @@ The raw dataset should be preserved without deleting or modifying
 the special N/A records. Any standardization of these values
 should be handled in the appropriate downstream cleaning layer.
 
-15. Coverage / Time Context
+## 15. Coverage / Time Context
 
 The Taxi Zone Lookup dataset is a reference/lookup dataset rather than a time-series trip dataset. It defines Taxi Zone and LocationID information used to interpret pickup and drop-off locations in TLC trip records.
 
@@ -418,7 +418,7 @@ Therefore, the dataset does not have a trip-date or monthly coverage period like
 
 Local collection date: September 14, 2026.
 
-16. Source Validation
+## 16. Source Validation
 
 The official Taxi Zone Lookup CSV was downloaded successfully from the NYC Taxi & Limousine Commission source and parsed successfully as a CSV file.
 
