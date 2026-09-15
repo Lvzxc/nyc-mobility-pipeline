@@ -5,7 +5,7 @@ from pathlib import Path
 URL = "https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv"
 
 # Local path for the raw dataset
-OUTPUT_PATH = Path("data/raw/taxi_zone_lookup.csv")
+OUTPUT_PATH = Path("/Volumes/nyc/default/nyc-mobility-volume/taxi_zones/taxi_zone_lookup.csv")
 
 
 def download_taxi_zones():
