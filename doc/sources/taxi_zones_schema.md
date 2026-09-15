@@ -37,7 +37,10 @@ trip distances, or other trip-level measures.
 
 ```text
 data/raw/taxi_zone_lookup.csv
-Collection Method
+```
+
+**Collection Method**
+
 
 The CSV was downloaded from the official NYC TLC source using Python and the requests library.
 
