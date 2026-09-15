@@ -13,16 +13,20 @@ SOURCE_PATH = Path(
 BRONZE_TABLE = "nyc.nyc_bronze.open_meteo_bronze"
 
 
+# Get the source filename for lineage
+source_file = SOURCE_PATH.name
+
+
 # Read the raw JSON file
 with open(SOURCE_PATH, "r", encoding="utf-8") as file:
     data = json.load(file)
 
 
-# Get the hourly weather data
+# Get the hourly weather data from the source
 hourly = data["hourly"]
 
 
-# Convert hourly arrays into rows
+# Convert the source arrays into rows
 weather_rows = []
 
 for i in range(len(hourly["time"])):
@@ -33,7 +37,8 @@ for i in range(len(hourly["time"])):
         "rain": hourly["rain"][i],
         "snowfall": hourly["snowfall"][i],
         "wind_speed_10m": hourly["wind_speed_10m"][i],
-        "weather_code": hourly["weather_code"][i]
+        "weather_code": hourly["weather_code"][i],
+        "source_file": source_file
     })
 
 
@@ -66,64 +71,12 @@ df = (
 display(df.limit(20))
 
 
-# Create Bronze table if it doesn't exist
-spark.sql(f"""
-CREATE TABLE IF NOT EXISTS {BRONZE_TABLE} (
-    timestamp TIMESTAMP,
-    temperature_2m DOUBLE,
-    precipitation DOUBLE,
-    rain DOUBLE,
-    snowfall DOUBLE,
-    wind_speed_10m DOUBLE,
-    weather_code INT,
-    ingestion_timestamp TIMESTAMP,
-    ingestion_date DATE
+# Write to Bronze as Delta
+(
+    df.write
+    .format("delta")
+    .mode("overwrite")
+    .saveAsTable(BRONZE_TABLE)
 )
-USING DELTA
-""")
 
-
-# Create temporary view for MERGE
-df.createOrReplaceTempView("open_meteo_source")
-
-
-# Merge into Bronze using timestamp as the natural key
-spark.sql(f"""
-MERGE INTO {BRONZE_TABLE} AS target
-USING open_meteo_source AS source
-ON target.timestamp = source.timestamp
-
-WHEN MATCHED THEN UPDATE SET
-    target.temperature_2m = source.temperature_2m,
-    target.precipitation = source.precipitation,
-    target.rain = source.rain,
-    target.snowfall = source.snowfall,
-    target.wind_speed_10m = source.wind_speed_10m,
-    target.weather_code = source.weather_code
-
-WHEN NOT MATCHED THEN INSERT (
-    timestamp,
-    temperature_2m,
-    precipitation,
-    rain,
-    snowfall,
-    wind_speed_10m,
-    weather_code,
-    ingestion_timestamp,
-    ingestion_date
-)
-VALUES (
-    source.timestamp,
-    source.temperature_2m,
-    source.precipitation,
-    source.rain,
-    source.snowfall,
-    source.wind_speed_10m,
-    source.weather_code,
-    source.ingestion_timestamp,
-    source.ingestion_date
-)
-""")
-
-
-print(f"Bronze table loaded successfully: {BRONZE_TABLE}")
+print(f"Bronze table created successfully: {BRONZE_TABLE}")
