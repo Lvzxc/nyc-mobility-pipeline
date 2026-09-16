@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS nyc.nyc_silver.green_taxi_silver (
 
     -- Surrogate key generated
-    trip_sk BIGINT GENERATED ALWAYS AS IDENTITY,
+    trip_key BIGINT GENERATED ALWAYS AS IDENTITY,
 
     -- Green Taxi trip data
     VendorID INT,
