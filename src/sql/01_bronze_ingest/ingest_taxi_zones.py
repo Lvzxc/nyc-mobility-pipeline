@@ -16,17 +16,25 @@ df = (
     .csv(source_path)
 )
 
+# Add ingestion metadata
+df = (
+    df
+    .withColumn("ingestion_timestamp", F.current_timestamp())
+    .withColumn("ingestion_date", F.current_date())
+)
+
 # Show schema
 df.printSchema()
 
 # Preview data
-display(df)
+display(df.limit(20))
 
 # Write to Bronze as Delta
 (
     df.write
     .format("delta")
     .mode("overwrite")
+    .option("overwriteSchema", "true")
     .saveAsTable(bronze_table)
 )
 
