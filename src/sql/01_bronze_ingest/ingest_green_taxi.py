@@ -4,7 +4,7 @@ from pyspark.sql import functions as F
 SOURCE_PATH = "/Volumes/nyc/default/nyc-mobility-volume/green_taxi/*.parquet"
 
 # Bronze Delta table
-BRONZE_TABLE = "nyc.nyc_bronze.green_taxi"
+BRONZE_TABLE = "nyc.nyc_bronze.green_taxi_bronze"
 
 # Read the raw Parquet files
 df = (
