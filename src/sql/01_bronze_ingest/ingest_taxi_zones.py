@@ -6,7 +6,7 @@ from pyspark.sql import functions as F
 source_path = "/Volumes/nyc/default/nyc-mobility-volume/taxi_zones/taxi_zone_lookup.csv"
 
 # Bronze table
-bronze_table = "nyc.nyc_bronze.taxi_zone_lookup"
+bronze_table = "nyc.nyc_bronze.taxi_zone"
 
 # Read CSV
 df = (
