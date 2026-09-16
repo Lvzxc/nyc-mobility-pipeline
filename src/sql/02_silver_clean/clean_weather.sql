@@ -1,4 +1,3 @@
-%sql
 CREATE TABLE IF NOT EXISTS nyc.nyc_silver.clean_weather (
     timestamp TIMESTAMP,
     temperature_2m DOUBLE,
@@ -19,6 +18,19 @@ CREATE TABLE IF NOT EXISTS nyc.nyc_silver.clean_weather (
 MERGE INTO nyc.nyc_silver.clean_weather AS target
 
 USING (
+    WITH deduplicated_weather AS (
+        SELECT
+            *,
+            ROW_NUMBER() OVER (
+                PARTITION BY timestamp
+                ORDER BY ingestion_timestamp DESC
+            ) AS rn
+
+        FROM nyc.nyc_bronze.weather_bronze
+
+        WHERE timestamp IS NOT NULL
+    )
+
     SELECT
         timestamp,
         temperature_2m,
@@ -34,7 +46,10 @@ USING (
         current_timestamp() AS silver_processed_timestamp,
         current_date() AS silver_processed_date
 
-    FROM nyc.nyc_bronze.weather_bronze
+    FROM deduplicated_weather
+
+    WHERE rn = 1
+
 ) AS source
 
 ON target.timestamp = source.timestamp
