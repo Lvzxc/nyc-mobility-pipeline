@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS nyc.nyc_silver.green_taxi_silver (
     bronze_ingestion_date DATE,
 
     -- Silver processing metadata
-    silver_processed_timestamp TIMESTAMP,
-    silver_processed_date DATE
+    silver_ingestion_timestamp TIMESTAMP,
+    silver_ingestion_date DATE
 );
 
 -- CLEAN, DEDUPLICATE, AND MERGE BRONZE -> SILVER
@@ -83,8 +83,8 @@ USING (
         ingestion_date AS bronze_ingestion_date,
 
         -- Silver processing metadata
-        current_timestamp() AS silver_processed_timestamp,
-        current_date() AS silver_processed_date
+        current_timestamp() AS silver_ingestion_timestamp,
+        current_date() AS silver_ingestion_date
 
     FROM (
 
@@ -113,6 +113,10 @@ USING (
             AND lpep_dropoff_datetime IS NOT NULL
             AND PULocationID IS NOT NULL
             AND DOLocationID IS NOT NULL
+
+            -- Project scope: March through May 2026 only
+             AND lpep_pickup_datetime >= '2026-03-01'
+             AND lpep_pickup_datetime < '2026-06-01'
 
             -- Make sure pickup month matches the source month
             AND date_format(
@@ -167,8 +171,8 @@ WHEN MATCHED THEN UPDATE SET
     target.bronze_ingestion_date = source.bronze_ingestion_date,
 
     -- Silver processing metadata
-    target.silver_processed_timestamp = source.silver_processed_timestamp,
-    target.silver_processed_date = source.silver_processed_date
+    target.silver_ingestion_timestamp = source.silver_ingestion_timestamp,
+    target.silver_ingestion_date = source.silver_ingestion_date
 
 
 
@@ -205,8 +209,8 @@ WHEN NOT MATCHED THEN INSERT (
     bronze_ingestion_date,
 
     -- Silver processing metadata
-    silver_processed_timestamp,
-    silver_processed_date
+    silver_ingestion_timestamp,
+    silver_ingestion_date
 )
 
 VALUES (
@@ -238,6 +242,6 @@ VALUES (
     source.bronze_ingestion_timestamp,
     source.bronze_ingestion_date,
 
-    source.silver_processed_timestamp,
-    source.silver_processed_date
+    source.silver_ingestion_timestamp,
+    source.silver_ingestion_date
 );
