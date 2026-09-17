@@ -1,20 +1,42 @@
 CREATE TABLE IF NOT EXISTS nyc.nyc_gold.dim_weather (
-    weather_key INT GENERATED ALWAYS AS IDENTITY,
+    weather_key BIGINT GENERATED ALWAYS AS IDENTITY,
     weather_datetime TIMESTAMP,
+
     temperature_2m DOUBLE,
     precipitation DOUBLE,
     rain DOUBLE,
     snowfall DOUBLE,
     wind_speed_10m DOUBLE,
     weather_code INT,
-    weather_condition STRING
+    weather_condition STRING,
+
+    silver_ingestion_timestamp TIMESTAMP,
+    silver_ingestion_date DATE,
+
+    gold_ingestion_timestamp TIMESTAMP,
+    gold_ingestion_date DATE
 );
 
 MERGE INTO nyc.nyc_gold.dim_weather AS target
 
 USING (
+
+    WITH deduplicated_weather AS (
+        SELECT
+            *,
+            ROW_NUMBER() OVER (
+                PARTITION BY timestamp
+                ORDER BY silver_ingestion_timestamp DESC
+            ) AS row_num
+
+        FROM nyc.nyc_silver.clean_weather
+
+        WHERE timestamp IS NOT NULL
+    )
+
     SELECT
         timestamp AS weather_datetime,
+
         temperature_2m,
         precipitation,
         rain,
@@ -52,11 +74,18 @@ USING (
             WHEN 96 THEN 'Thunderstorm with slight hail'
             WHEN 99 THEN 'Thunderstorm with heavy hail'
             ELSE 'Unknown'
-        END AS weather_condition
+        END AS weather_condition,
 
-    FROM nyc.nyc_silver.clean_weather
+        silver_ingestion_timestamp,
+        silver_ingestion_date,
 
-    WHERE timestamp IS NOT NULL
+        current_timestamp() AS gold_ingestion_timestamp,
+        current_date() AS gold_ingestion_date
+
+    FROM deduplicated_weather
+
+    WHERE row_num = 1
+
 ) AS source
 
 ON target.weather_datetime = source.weather_datetime
@@ -68,7 +97,13 @@ WHEN MATCHED THEN UPDATE SET
     target.snowfall = source.snowfall,
     target.wind_speed_10m = source.wind_speed_10m,
     target.weather_code = source.weather_code,
-    target.weather_condition = source.weather_condition
+    target.weather_condition = source.weather_condition,
+
+    target.silver_ingestion_timestamp = source.silver_ingestion_timestamp,
+    target.silver_ingestion_date = source.silver_ingestion_date,
+
+    target.gold_ingestion_timestamp = source.gold_ingestion_timestamp,
+    target.gold_ingestion_date = source.gold_ingestion_date
 
 WHEN NOT MATCHED THEN INSERT (
     weather_datetime,
@@ -78,7 +113,13 @@ WHEN NOT MATCHED THEN INSERT (
     snowfall,
     wind_speed_10m,
     weather_code,
-    weather_condition
+    weather_condition,
+
+    silver_ingestion_timestamp,
+    silver_ingestion_date,
+
+    gold_ingestion_timestamp,
+    gold_ingestion_date
 )
 
 VALUES (
@@ -89,5 +130,11 @@ VALUES (
     source.snowfall,
     source.wind_speed_10m,
     source.weather_code,
-    source.weather_condition
+    source.weather_condition,
+
+    source.silver_ingestion_timestamp,
+    source.silver_ingestion_date,
+
+    source.gold_ingestion_timestamp,
+    source.gold_ingestion_date
 );
