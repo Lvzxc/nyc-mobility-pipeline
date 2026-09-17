@@ -32,8 +32,8 @@ USING (
             CAST(TRIM(Zone) AS STRING) AS zone,
             CAST(TRIM(service_zone) AS STRING) AS service_zone,
             -- Extract Bronze ingestion metadata
-            CAST(ingestion_timestamp AS TIMESTAMP) AS bronze_ingestion_timestamp,
-            CAST(ingestion_date AS DATE) AS bronze_ingestion_date,
+            CAST(bronze_ingestion_timestamp AS TIMESTAMP) AS bronze_ingestion_timestamp,
+            CAST(bronze_ingestion_date AS DATE) AS bronze_ingestion_date,
             -- Assign row numbers per location_id to identify duplicates
             ROW_NUMBER() OVER (
                 PARTITION BY TRY_CAST(LocationID AS INT)
