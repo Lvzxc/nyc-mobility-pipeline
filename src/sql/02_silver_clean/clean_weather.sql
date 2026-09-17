@@ -8,11 +8,11 @@ CREATE TABLE IF NOT EXISTS nyc.nyc_silver.clean_weather (
     weather_code BIGINT,
 
     source_file STRING,
-    ingestion_timestamp TIMESTAMP,
-    ingestion_date DATE,
+    bronze_ingestion_timestamp TIMESTAMP,
+    bronze_ingestion_date DATE,
 
-    silver_processed_timestamp TIMESTAMP,
-    silver_processed_date DATE
+    silver_ingestion_timestamp TIMESTAMP,
+    silver_ingestion_date DATE
 );
 
 MERGE INTO nyc.nyc_silver.clean_weather AS target
@@ -23,7 +23,7 @@ USING (
             *,
             ROW_NUMBER() OVER (
                 PARTITION BY timestamp
-                ORDER BY ingestion_timestamp DESC
+                ORDER BY bronze_ingestion_timestamp DESC
             ) AS rn
 
         FROM nyc.nyc_bronze.weather_bronze
@@ -40,11 +40,11 @@ USING (
         wind_speed_10m,
         weather_code,
         source_file,
-        ingestion_timestamp,
-        ingestion_date,
+        bronze_ingestion_timestamp,
+        bronze_ingestion_date,
 
-        current_timestamp() AS silver_processed_timestamp,
-        current_date() AS silver_processed_date
+        current_timestamp() AS silver_ingestion_timestamp,
+        current_date() AS silver_ingestion_date
 
     FROM deduplicated_weather
 
@@ -62,10 +62,10 @@ WHEN MATCHED THEN UPDATE SET
     target.wind_speed_10m = source.wind_speed_10m,
     target.weather_code = source.weather_code,
     target.source_file = source.source_file,
-    target.ingestion_timestamp = source.ingestion_timestamp,
-    target.ingestion_date = source.ingestion_date,
-    target.silver_processed_timestamp = source.silver_processed_timestamp,
-    target.silver_processed_date = source.silver_processed_date
+    target.bronze_ingestion_timestamp = source.bronze_ingestion_timestamp,
+    target.bronze_ingestion_date = source.bronze_ingestion_date,
+    target.silver_ingestion_timestamp = source.silver_ingestion_timestamp,
+    target.silver_ingestion_date = source.silver_ingestion_date
 
 WHEN NOT MATCHED THEN INSERT (
     timestamp,
@@ -76,10 +76,10 @@ WHEN NOT MATCHED THEN INSERT (
     wind_speed_10m,
     weather_code,
     source_file,
-    ingestion_timestamp,
-    ingestion_date,
-    silver_processed_timestamp,
-    silver_processed_date
+    bronze_ingestion_timestamp,
+    bronze_ingestion_date,
+    silver_ingestion_timestamp,
+    silver_ingestion_date
 )
 
 VALUES (
@@ -91,8 +91,8 @@ VALUES (
     source.wind_speed_10m,
     source.weather_code,
     source.source_file,
-    source.ingestion_timestamp,
-    source.ingestion_date,
-    source.silver_processed_timestamp,
-    source.silver_processed_date
+    source.bronze_ingestion_timestamp,
+    source.bronze_ingestion_date,
+    source.silver_ingestion_timestamp,
+    source.silver_ingestion_date
 );
