@@ -1,14 +1,4 @@
-# DIM_LOCATION Gold Data Quality Checks
-
-## Table
-
-`nyc.nyc_gold.dim_location`
-
-## Purpose
-
-These checks validate whether the `dim_location` Gold dimension follows the intended dimensional model and remains consistent with the clean Silver source table:
-
-`nyc.nyc_silver.taxi_zones_silver`
+# Gold Dim Location Data Quality Checks
 
 ## Grain
 
