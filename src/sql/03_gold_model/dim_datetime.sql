@@ -24,17 +24,17 @@ CREATE TABLE IF NOT EXISTS nyc.nyc_gold.dim_datetime (
 MERGE INTO nyc.nyc_gold.dim_datetime AS target
 USING (
     WITH hourly_range AS (
-        -- Generate hourly sequence for 2026
+        -- Generate hourly sequence for March 2026 through May 2026
         SELECT explode(
             sequence(
-                to_timestamp('2026-01-01 00:00:00'), 
-                to_timestamp('2026-12-31 23:00:00'), 
+                to_timestamp('2026-03-01 00:00:00'), 
+                to_timestamp('2026-05-31 23:00:00'), 
                 interval 1 hour
             )
         ) AS dt
     ),
     calculated_dates AS (
-        -- Unknown Member Row (0)
+        -- Unknown Member Row (Key = 0)
         SELECT 
             CAST(0 AS BIGINT) AS datetime_key,
             to_timestamp('1900-01-01 00:00:00') AS full_datetime,
@@ -57,7 +57,7 @@ USING (
 
         UNION ALL
 
-        -- Standard Date/Time Transformations
+        -- Standard Date/Time Transformations (March - May 2026)
         SELECT 
             -- Primary Key (Sequential starting from 1)
             CAST(ROW_NUMBER() OVER (ORDER BY dt) AS BIGINT) AS datetime_key,
@@ -90,7 +90,7 @@ USING (
             CASE WHEN dayofweek(dt) BETWEEN 2 AND 6 AND hour(dt) IN (7, 8, 9, 16, 17, 18, 19) THEN true ELSE false END AS is_rush_hour,
             dayofweek(dt) AS day_of_week,
 
-            -- Audit Metadata
+            -- Audit Metadata (Gold Layer Execution)
             CAST(current_timestamp() AS TIMESTAMP) AS gold_ingestion_timestamp,
             CAST(current_date() AS DATE) AS gold_ingestion_date
         FROM hourly_range
@@ -98,7 +98,7 @@ USING (
     SELECT * FROM calculated_dates
 ) AS source
 -- Match on actual timestamp to preserve assigned sequential keys
-ON target.full_datetime = source.full_datetime  
+ON target.full_datetime = source.full_datetime
 
 WHEN MATCHED THEN UPDATE SET
     target.datetime_key = source.datetime_key,
