@@ -19,10 +19,10 @@ WITH metrics AS (
         -- Lineage and Silver processing metadata should exist
         COUNT_IF(
             source_file IS NULL
-            OR ingestion_timestamp IS NULL
-            OR ingestion_date IS NULL
-            OR silver_processed_timestamp IS NULL
-            OR silver_processed_date IS NULL
+            OR bronze_ingestion_timestamp IS NULL
+            OR bronze_ingestion_date IS NULL
+            OR silver_ingestion_timestamp IS NULL
+            OR silver_ingestion_date IS NULL
         ) AS null_lineage,
 
         -- Weather measurements should not be negative
