@@ -66,16 +66,11 @@ Two records contain borough values outside the currently defined accepted-value 
 
 - `Unknown`
 - `N/A`
-
-The failure rate is:
-
-`2 / 265 × 100 = 0.75%`
-
-Because the configured warning threshold for `ACCEPTED_VALUE` is **1%**, the result is classified as **WARN** rather than **FAIL**.
-
-The two records should be reviewed against the Silver-layer business rules. They should not be deleted solely to eliminate the warning.
-
+  
+``` text
+Retain valid text entries such as 'Unknown' and 'N/A' across borough, zone, and service_zone to preserve official NYC TLC spatial definitions, explicitly distinguishing Unknown (uncaptured or missing GPS/meter data) from N/A (non-applicable attributes, such as out-of-city trips or non-regulated service zones).
 ## Business Model Validation
+```
 
 The results support the intended `dim_location` design:
 
