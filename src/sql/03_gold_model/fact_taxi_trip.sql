@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS nyc.nyc_gold.fact_taxi_trip (
     store_and_fwd_flag STRING,
     trip_type BIGINT,
 
-    lpep_pickup_datetime TIMESTAMP,   -- FK -> dim_datetime.full_datetime
-    lpep_dropoff_datetime TIMESTAMP,  -- FK -> dim_datetime.full_datetime
+    lpep_pickup_datetime TIMESTAMP,   -- FK -> dim_datetime.full_datetime (hour-truncated for lookup)
+    lpep_dropoff_datetime TIMESTAMP,  -- FK -> dim_datetime.full_datetime (hour-truncated for lookup)
 
     PULocationID INT,                 -- FK -> dim_location.location_id
     DOLocationID INT,                 -- FK -> dim_location.location_id
@@ -42,11 +42,15 @@ USING (
         s.store_and_fwd_flag,
         s.trip_type,
 
-        -- Pulled from dim_datetime
-        dt_pu.full_datetime AS lpep_pickup_datetime,
-        dt_do.full_datetime AS lpep_dropoff_datetime,
+        -- FIX: use Silver's real timestamps, not dim_datetime's
+        -- truncated value. dt_pu/dt_do below are used ONLY to
+        -- validate the hour exists in dim_datetime — never to
+        -- supply the actual stored value.
+        s.lpep_pickup_datetime,
+        s.lpep_dropoff_datetime,
 
-        -- Pulled from dim_location
+        -- Pulled from dim_location (these ARE meant to be the dim's value,
+        -- since location_id has no finer grain than the dimension itself)
         dl_pu.location_id AS PULocationID,
         dl_do.location_id AS DOLocationID,
 
@@ -76,11 +80,11 @@ USING (
 
     FROM nyc.nyc_silver.green_taxi_silver AS s
 
-    -- INNER JOIN: pickup datetime must exist in dim_datetime, or the trip is dropped
+    -- INNER JOIN: existence check only — pickup hour must exist in dim_datetime
     INNER JOIN nyc.nyc_gold.dim_datetime AS dt_pu
         ON date_trunc('hour', s.lpep_pickup_datetime) = dt_pu.full_datetime
 
-    -- INNER JOIN: dropoff datetime must exist in dim_datetime, or the trip is dropped
+    -- INNER JOIN: existence check only — dropoff hour must exist in dim_datetime
     INNER JOIN nyc.nyc_gold.dim_datetime AS dt_do
         ON date_trunc('hour', s.lpep_dropoff_datetime) = dt_do.full_datetime
 
@@ -98,6 +102,8 @@ USING (
 
 ) AS source
 
+-- Now matches on Silver's real per-minute timestamps again,
+-- consistent with green_taxi_silver's own composite key.
 ON  target.vendor_id             <=> source.vendor_id
 AND target.lpep_pickup_datetime  <=> source.lpep_pickup_datetime
 AND target.lpep_dropoff_datetime <=> source.lpep_dropoff_datetime
