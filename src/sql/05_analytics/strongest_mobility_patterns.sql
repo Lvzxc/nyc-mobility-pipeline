@@ -25,7 +25,9 @@ GROUP BY
     l.zone
 
 ORDER BY
-    pickup_trips DESC;
+    pickup_trips DESC
+    
+    LIMIT 5;
 
 -- MOBILITY OPPORTUNITIES: Identifies areas with lower overall taxi mobility
 
@@ -75,4 +77,6 @@ LEFT JOIN dropoff AS d
     ON l.location_id = d.location_id
 
 ORDER BY
-    total_mobility_activity ASC;
+    total_mobility_activity ASC
+    
+    LIMIT 5;
