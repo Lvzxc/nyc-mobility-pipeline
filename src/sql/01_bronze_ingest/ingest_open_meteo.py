@@ -55,11 +55,11 @@ df = df.withColumn(
 df = (
     df
     .withColumn(
-        "ingestion_timestamp",
+        "bronze_ingestion_timestamp",
         F.current_timestamp()
     )
     .withColumn(
-        "ingestion_date",
+        "bronze_ingestion_date",
         F.current_date()
     )
 )
