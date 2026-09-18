@@ -79,8 +79,8 @@ USING (
         -- Bronze lineage
         source_file AS bronze_source_file,
         source_month AS bronze_source_month,
-        ingestion_timestamp AS bronze_ingestion_timestamp,
-        ingestion_date AS bronze_ingestion_date,
+        bronze_ingestion_timestamp,
+        bronze_ingestion_date,
 
         -- Silver processing metadata
         current_timestamp() AS silver_ingestion_timestamp,
@@ -102,7 +102,7 @@ USING (
                     DOLocationID,
                     trip_distance,
                     total_amount
-                ORDER BY ingestion_timestamp DESC
+                ORDER BY bronze_ingestion_timestamp DESC
             ) AS row_num
 
         FROM nyc.nyc_bronze.green_taxi_bronze
