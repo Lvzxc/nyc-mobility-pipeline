@@ -25,53 +25,6 @@
 | Silver locations missing from Gold | REFERENTIAL_INTEGRITY | Every unique Silver location exists in Gold | 0 missing |
 | Gold locations missing from Silver | REFERENTIAL_INTEGRITY | Every Gold location exists in Silver | 0 missing |
 
-## DQ Framework
-
-The validation produces the following fields:
-
-- `table_name` — Gold table being checked.
-- `check_name` — Name of the individual DQ rule.
-- `check_type` — Category of the DQ check.
-- `records_checked` — Number of records evaluated.
-- `failures` — Number of records that violate the rule.
-- `expected_value` — Expected result or accepted condition.
-- `actual_value` — Actual number/result found.
-- `failure_pct` — Percentage of checked records that failed.
-- `status` — Final result: `PASS`, `WARN`, or `FAIL`.
-
-## Thresholds
-
-## WARN
-
-The following checks produce a warning when the failure rate is within the configured tolerance:
-
-- `UNIQUE` — up to 1%
-- `RANGE` — up to 1%
-- `ACCEPTED_VALUE` — up to 1%
-- `BUSINESS_RULE` — up to 1%
-- `REFERENTIAL_INTEGRITY` — up to 1%
-- `NULL` — up to 1%
-- `VOLUME` — up to 2%
-
-## FAIL
-
-A check fails when its failure rate exceeds the applicable threshold.
-
-Mandatory key `NULL` checks are treated as failures whenever a required value is missing.
-
-## Special Values
-
-The current data contains borough values:
-
-```text
-Unknown
-N/A
-```
-
-These values are not automatically deleted from `dim_location`.
-
-They should first be assessed against the Silver-layer business rules. If they are legitimate source values, they can be retained or standardized consistently. Removing the entire location record could cause valid taxi-zone references to be lost.
-
 ## Summary
 
 | Metric | Result |
@@ -113,33 +66,15 @@ Two records contain borough values outside the currently defined accepted-value 
 
 - `Unknown`
 - `N/A`
+  
+``` text
+Retain valid text entries such as 'Unknown' and 'N/A' across borough, zone, and service_zone to preserve official NYC TLC spatial definitions, explicitly distinguishing Unknown (uncaptured or missing GPS/meter data) from N/A (non-applicable attributes, such as out-of-city trips or non-regulated service zones).
+```
 
-The failure rate is:
+## Conclusion
 
-`2 / 265 × 100 = 0.75%`
+The Gold location dimension passed all defined DQ checks with one warning and no failures. The table contains the expected 265 unique locations, with valid and unique `location_id` business keys and `location_key` surrogate keys. No missing location attributes, conflicting location attributes, or inconsistencies between the Silver and Gold location IDs were detected. The only warning was related to two `borough` values, `Unknown` and `N/A`. These values were intentionally retained to preserve the official NYC TLC spatial definitions, distinguishing `Unknown` values from uncaptured or missing location information and `N/A` values from non-applicable attributes such as out-of-city trips or non-regulated service zones.
 
-Because the configured warning threshold for `ACCEPTED_VALUE` is **1%**, the result is classified as **WARN** rather than **FAIL**.
+The dimension is ready to be referenced by the Gold fact table for location-based mobility analysis and pickup/drop-off area analysis.
 
-The two records should be reviewed against the Silver-layer business rules. They should not be deleted solely to eliminate the warning.
 
-## Business Model Validation
-
-The results support the intended `dim_location` design:
-
-- **Grain:** One row per `location_id`.
-- **Surrogate key:** `location_key` is populated and unique.
-- **Business key:** `location_id` is populated and unique.
-- **Measures:** Not applicable because this is a dimension table; it contains descriptive attributes rather than measures.
-- **Business rules:** No conflicting location attributes were detected.
-- **Source consistency:** Silver and Gold contain the same set of location IDs.
-- **Volume:** Gold contains 265 records, matching the expected 265 unique Silver locations.
-
-### Design Assumptions
-
-* Silver data is already cleaned and deduplicated.
-* Gold does not repeat Silver-layer ROW_NUMBER() deduplication.
-* location_id defines the dimension grain.
-* location_key is a Gold-generated surrogate key.
-* MERGE INTO uses location_id to support incremental and idempotent loading.
-* Similar or identical zone names do not imply duplicate locations; location_id determines uniqueness.
-* DQ checks identify data-quality issues rather than hiding them by changing the validation rules.
