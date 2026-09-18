@@ -69,16 +69,8 @@ Two records contain borough values outside the currently defined accepted-value 
   
 ``` text
 Retain valid text entries such as 'Unknown' and 'N/A' across borough, zone, and service_zone to preserve official NYC TLC spatial definitions, explicitly distinguishing Unknown (uncaptured or missing GPS/meter data) from N/A (non-applicable attributes, such as out-of-city trips or non-regulated service zones).
-## Business Model Validation
 ```
 
-The results support the intended `dim_location` design:
 
-- **Grain:** One row per `location_id`.
-- **Surrogate key:** `location_key` is populated and unique.
-- **Business key:** `location_id` is populated and unique.
-- **Measures:** Not applicable because this is a dimension table; it contains descriptive attributes rather than measures.
-- **Business rules:** No conflicting location attributes were detected.
-- **Source consistency:** Silver and Gold contain the same set of location IDs.
-- **Volume:** Gold contains 265 records, matching the expected 265 unique Silver locations.
+
 
