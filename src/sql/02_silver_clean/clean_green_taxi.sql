@@ -59,7 +59,7 @@ USING (
         COALESCE(RatecodeID, -1) AS RatecodeID,
         PULocationID,
         DOLocationID,
-        COALESCE(passenger_count, -1) AS passenger_count,
+        passenger_count,
 
         trip_distance,
         fare_amount,
@@ -114,9 +114,22 @@ USING (
             AND PULocationID IS NOT NULL
             AND DOLocationID IS NOT NULL
 
+            -- Drop invalid trip durations
+            AND lpep_dropoff_datetime >= lpep_pickup_datetime
+
+            -- Drop invalid financial values
+            AND fare_amount >= 0
+            AND total_amount >= 0
+
+            -- Drop trips with no distance
+            AND trip_distance > 0
+
+            -- Drop trips with no passengers
+            AND passenger_count > 0
+
             -- Project scope: March through May 2026 only
-             AND lpep_pickup_datetime >= '2026-03-01'
-             AND lpep_pickup_datetime < '2026-06-01'
+            AND lpep_pickup_datetime >= '2026-03-01'
+            AND lpep_pickup_datetime < '2026-06-01'
 
             -- Make sure pickup month matches the source month
             AND date_format(
