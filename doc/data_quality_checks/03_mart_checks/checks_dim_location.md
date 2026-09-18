@@ -25,53 +25,6 @@
 | Silver locations missing from Gold | REFERENTIAL_INTEGRITY | Every unique Silver location exists in Gold | 0 missing |
 | Gold locations missing from Silver | REFERENTIAL_INTEGRITY | Every Gold location exists in Silver | 0 missing |
 
-## DQ Framework
-
-The validation produces the following fields:
-
-- `table_name` — Gold table being checked.
-- `check_name` — Name of the individual DQ rule.
-- `check_type` — Category of the DQ check.
-- `records_checked` — Number of records evaluated.
-- `failures` — Number of records that violate the rule.
-- `expected_value` — Expected result or accepted condition.
-- `actual_value` — Actual number/result found.
-- `failure_pct` — Percentage of checked records that failed.
-- `status` — Final result: `PASS`, `WARN`, or `FAIL`.
-
-## Thresholds
-
-## WARN
-
-The following checks produce a warning when the failure rate is within the configured tolerance:
-
-- `UNIQUE` — up to 1%
-- `RANGE` — up to 1%
-- `ACCEPTED_VALUE` — up to 1%
-- `BUSINESS_RULE` — up to 1%
-- `REFERENTIAL_INTEGRITY` — up to 1%
-- `NULL` — up to 1%
-- `VOLUME` — up to 2%
-
-## FAIL
-
-A check fails when its failure rate exceeds the applicable threshold.
-
-Mandatory key `NULL` checks are treated as failures whenever a required value is missing.
-
-## Special Values
-
-The current data contains borough values:
-
-```text
-Unknown
-N/A
-```
-
-These values are not automatically deleted from `dim_location`.
-
-They should first be assessed against the Silver-layer business rules. If they are legitimate source values, they can be retained or standardized consistently. Removing the entire location record could cause valid taxi-zone references to be lost.
-
 ## Summary
 
 | Metric | Result |
@@ -134,12 +87,3 @@ The results support the intended `dim_location` design:
 - **Source consistency:** Silver and Gold contain the same set of location IDs.
 - **Volume:** Gold contains 265 records, matching the expected 265 unique Silver locations.
 
-### Design Assumptions
-
-* Silver data is already cleaned and deduplicated.
-* Gold does not repeat Silver-layer ROW_NUMBER() deduplication.
-* location_id defines the dimension grain.
-* location_key is a Gold-generated surrogate key.
-* MERGE INTO uses location_id to support incremental and idempotent loading.
-* Similar or identical zone names do not imply duplicate locations; location_id determines uniqueness.
-* DQ checks identify data-quality issues rather than hiding them by changing the validation rules.
