@@ -28,8 +28,8 @@ WITH metrics AS (
             OR bronze_source_month IS NULL
             OR bronze_ingestion_timestamp IS NULL
             OR bronze_ingestion_date IS NULL
-            OR silver_processed_timestamp IS NULL
-            OR silver_processed_date IS NULL
+            OR silver_ingestion_timestamp IS NULL
+            OR silver_ingestion_date IS NULL
         ) AS null_lineage,
 
         -- Fields cleaned using COALESCE() should not remain NULL
