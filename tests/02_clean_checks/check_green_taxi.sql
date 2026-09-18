@@ -1,5 +1,3 @@
-%sql
-
 WITH metrics AS (
 
     SELECT
