@@ -19,8 +19,8 @@ df = (
 # Add ingestion metadata
 df = (
     df
-    .withColumn("ingestion_timestamp", F.current_timestamp())
-    .withColumn("ingestion_date", F.current_date())
+    .withColumn("bronze_ingestion_timestamp", F.current_timestamp())
+    .withColumn("bronze_ingestion_date", F.current_date())
 )
 
 # Show schema
