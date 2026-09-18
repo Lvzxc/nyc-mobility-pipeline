@@ -164,6 +164,9 @@ dq_results AS (
 
     -- ========================================================
     -- 8. REFERENTIAL INTEGRITY - PICKUP DATETIME
+    -- FIXED: now truncates to the hour before matching, since
+    -- fact_taxi_trip stores real per-minute timestamps while
+    -- dim_datetime only has on-the-hour rows.
     -- ========================================================
     SELECT
         'fact_taxi_trip', 'lpep_pickup_datetime not in dim_datetime', 'REFERENTIAL_INTEGRITY',
@@ -173,7 +176,25 @@ dq_results AS (
         CAST(COUNT_IF(dt.full_datetime IS NULL) AS STRING)
     FROM base b
     LEFT JOIN nyc.nyc_gold.dim_datetime dt
-        ON b.lpep_pickup_datetime = dt.full_datetime
+        ON date_trunc('hour', b.lpep_pickup_datetime) = dt.full_datetime
+
+
+    UNION ALL
+
+
+    -- ========================================================
+    -- 8b. REFERENTIAL INTEGRITY - DROPOFF DATETIME
+    -- NEW: dropoff was never checked in the original script.
+    -- ========================================================
+    SELECT
+        'fact_taxi_trip', 'lpep_dropoff_datetime not in dim_datetime', 'REFERENTIAL_INTEGRITY',
+        COUNT(*),
+        COUNT_IF(dt.full_datetime IS NULL),
+        '0',
+        CAST(COUNT_IF(dt.full_datetime IS NULL) AS STRING)
+    FROM base b
+    LEFT JOIN nyc.nyc_gold.dim_datetime dt
+        ON date_trunc('hour', b.lpep_dropoff_datetime) = dt.full_datetime
 
 
     UNION ALL
@@ -212,6 +233,7 @@ dq_results AS (
     -- ========================================================
     -- 11. RANGE - TRIP DURATION
     -- Dropoff before pickup would produce a negative duration.
+    -- Known issue traced back to green_taxi_silver (1 row).
     -- ========================================================
     SELECT
         'fact_taxi_trip', 'Negative trip_duration_minutes', 'RANGE',
@@ -346,15 +368,3 @@ ORDER BY
     END,
     check_type,
     check_name;
-
-
--- To show the duplicate records and group size per 7 column composite business key
-SELECT
-    vendor_id, lpep_pickup_datetime, lpep_dropoff_datetime,
-    PULocationID, DOLocationID, trip_distance, total_amount,
-    COUNT(*) AS group_size
-FROM nyc.nyc_gold.fact_taxi_trip
-GROUP BY vendor_id, lpep_pickup_datetime, lpep_dropoff_datetime,
-         PULocationID, DOLocationID, trip_distance, total_amount
-HAVING COUNT(*) > 1
-ORDER BY group_size DESC;
