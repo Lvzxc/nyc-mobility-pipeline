@@ -49,10 +49,10 @@ The project focuses on:
 
 
 ### Main Takeaways
-
+* Taxi demand reaches its highest volume during weekday late afternoons between 4 PM and 6 PM.
+* Rain and snow significantly increase both hourly ride demand and average fare earnings per mile.
+* Most trip activity is concentrated in Manhattan, with primary traffic flows extending into Brooklyn and Queens.
 ---
-
-# Pipeline Layers
 
 # Pipeline Layers
 
