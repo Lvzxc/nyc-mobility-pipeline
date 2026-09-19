@@ -15,8 +15,8 @@ MERGE INTO nyc.nyc_silver.taxi_zones_silver AS target
 USING (
     SELECT
         location_id,
-        borough,
-        zone,
+        INITCAP(TRIM(borough)) AS borough,
+        INITCAP(TRIM(zone)) AS zone,
         service_zone,
         bronze_ingestion_timestamp,
         bronze_ingestion_date,
