@@ -24,23 +24,37 @@ on:
 permissions:
   contents: read
 
-# PR runs are collapsed to the newest commit.
 concurrency:
   group: nyc-mobility-pipeline-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+
   validate:
     name: Validate repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
+
       - name: Check out repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
           persist-credentials: false
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
       - name: Check whitespace errors
         run: git diff --check
+
+      - name: Run tests
+        run: pytest tests/ -v
