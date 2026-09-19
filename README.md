@@ -179,14 +179,6 @@ Green Taxi data is provided as Parquet files, Taxi Zone data as CSV, and weather
 10. Analytics Validation
 ```
 
-The corresponding documentation and pipeline components are organized under:
-
-```text
-doc/
-```
-
----
-
 ## Decisions
 
 The architecture of the pipeline relies on key design decisions to guarantee reliable and scalable data processing. Below is a brief overview; for in-depth documentation, proceed to 
