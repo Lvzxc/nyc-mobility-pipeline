@@ -41,11 +41,11 @@ The project focuses on:
 
 ## Key Findings
 
-| Business Area                | Key Finding                                                                                                                                                      |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Taxi Demand**              |  |
-| **Weather effect on taxi demand** |                                             |
-| **Top Areas Mobility**          |                         |
+| Business Area | Key Finding |
+| :--- | :--- |
+| **Taxi Demand** | • **Busiest Hours:** Taxi rides peak on weekday late afternoons from **4 PM to 6 PM**, with **Thursday at 4 PM** being the single busiest hour.<br>• **Most Common Weather:** Almost **40% of all trips** take place on **overcast (cloudy)** days, followed by clear days (25%). |
+| **Weather Effect on Taxi Demand** | • **Bad Weather Spikes Demand:** Hourly demand jumps to over **70 rides/hour** during snow, compared to **44 rides/hour** on clear days.<br>• **Higher Costs & Times:** Moderate rain drives fare per mile up from **$15/mile to $27/mile**, while snow increases average trip durations. |
+| **Top Areas Mobility** | • **Manhattan Leads:** Pickups and drop-offs are heavily concentrated in **Manhattan**, with major trip flows extending into **Brooklyn** and **Queens**.<br>• **Commuter Corridors:** High-demand zones maintain consistent volume across morning and evening rush hours, with longer average distances on inter-borough trips. |
 
 
 ### Main Takeaways
