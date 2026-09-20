@@ -1,21 +1,30 @@
+```yaml
 name: NYC Mobility CI/CD
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
     paths:
       - "src/**"
       - "tests/**"
       - "docs/**"
+      - "resources/**"
+      - "databricks.yml"
       - ".github/workflows/ci-cd.yml"
       - ".gitignore"
 
   push:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
     paths:
       - "src/**"
       - "tests/**"
       - "docs/**"
+      - "resources/**"
+      - "databricks.yml"
       - ".github/workflows/ci-cd.yml"
       - ".gitignore"
 
@@ -23,12 +32,17 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: nyc-mobility-pipeline-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+
+  # ==================================================
+  # CI - VALIDATE REPOSITORY
+  # ==================================================
 
   validate:
     name: Validate repository
@@ -59,4 +73,77 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v
 
-    
+
+  # ==================================================
+  # CD - DEPLOY TO DEV
+  # ==================================================
+
+  deploy-dev:
+    name: Deploy to DEV
+    needs: validate
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    environment: dev
+
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+
+    steps:
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate Databricks Bundle
+        run: |
+          databricks bundle validate -t dev
+
+      - name: Deploy Databricks Bundle
+        run: |
+          databricks bundle deploy -t dev
+
+
+  # ==================================================
+  # CD - DEPLOY TO PROD
+  # ==================================================
+
+  deploy-prod:
+    name: Deploy to PROD
+    needs: validate
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    environment: prod
+
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+
+    steps:
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate Databricks Bundle
+        run: |
+          databricks bundle validate -t prod
+
+      - name: Deploy Databricks Bundle
+        run: |
+          databricks bundle deploy -t prod
+```
