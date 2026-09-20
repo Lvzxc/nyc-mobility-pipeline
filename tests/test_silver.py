@@ -2,7 +2,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC = REPO_ROOT / "src" / "sql" / "02_silver_clean"
-DQ = REPO_ROOT / "tests" / "02_clean_checks"
+DQ = REPO_ROOT  / "src" / "sql"/ "04_data_quality"/ "02_clean_checks"
 
 SILVER_FILES = [
     SRC / "clean_green_taxi.sql",
