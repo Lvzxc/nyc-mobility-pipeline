@@ -3,7 +3,7 @@ import ast
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC = REPO_ROOT / "src" / "sql"
-DQ = REPO_ROOT / "tests" / "01_source_checks"
+DQ = REPO_ROOT  / "src" / "sql"/ "04_data_quality"/ "01_source_checks"
 
 SOURCE_PY_FILES = [
     SRC / "00_setup" / "download_green_taxi.py",
