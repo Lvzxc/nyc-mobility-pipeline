@@ -1,0 +1,12 @@
+bundle:
+  name: nyc-mobility-pipeline
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development
+
+  prod:
+    mode: production
