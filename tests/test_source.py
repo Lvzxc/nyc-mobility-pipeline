@@ -9,7 +9,6 @@ SOURCE_PY_FILES = [
     SRC / "00_setup" / "download_green_taxi.py",
     SRC / "00_setup" / "download_open_meteo.py",
     SRC / "00_setup" / "download_taxi_zones.py",
-    SRC / "00_setup" / "volume_creation.py",
     SRC / "01_bronze_ingest" / "ingest_green_taxi.py",
     SRC / "01_bronze_ingest" / "ingest_open_meteo.py",
     SRC / "01_bronze_ingest" / "ingest_taxi_zones.py",
