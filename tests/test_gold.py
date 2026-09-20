@@ -2,7 +2,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC = REPO_ROOT / "src" / "sql" / "03_gold_model"
-DQ = REPO_ROOT / "tests" / "03_mart_checks"
+DQ = REPO_ROOT / "src" / "sql"/ "04_data_quality"/ "03_mart_checks"
 
 GOLD_FILES = [
     SRC / "dim_datetime.sql",
