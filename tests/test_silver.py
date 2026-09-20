@@ -45,8 +45,8 @@ def test_green_taxi_silver_references_bronze():
     assert "green_taxi_bronze" in sql
 
 def test_taxi_zone_silver_references_bronze():
-    sql = (SRC / "clean_taxi_zones.sql").read_text(encoding="utf-8").lower()
-    assert "taxi_zones_bronze" in sql
+    sql = (SRC / "clean_taxi_zone.sql").read_text(encoding="utf-8").lower()
+    assert "taxi_zone_bronze" in sql
 
 def test_weather_silver_references_bronze():
     sql = (SRC / "clean_weather.sql").read_text(encoding="utf-8").lower()
