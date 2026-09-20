@@ -181,13 +181,15 @@ Green Taxi data is provided as Parquet files, Taxi Zone data as CSV, and weather
 
 ## Decisions
 
-The architecture of the pipeline relies on key design decisions to guarantee reliable and scalable data processing. Below is a brief overview; for in-depth documentation, proceed to 
+The architecture of the pipeline relies on key design decisions to guarantee reliable and scalable data processing. Below is a brief overview; for in-depth documentation, proceed to
 
 * The pipeline is separated into Source, Bronze, Silver, Gold, and Analytics layers to isolate ingestion, transformation, modeling, and analysis.
 * Delta tables provide reliable storage, allowing for safe reruns and incremental updates without duplicating data.
-* The Bronze layer preserves the raw source structure, while the Silver layer handles all data cleaning, type standardization, and deduplication.
+* The Bronze layer preserves the raw source structure, while the Silver layer handles data cleaning, type standardization, validation, and deduplication.
 * Surrogate keys map facts to dimensions in the Gold layer, enforcing a strict fact grain to prevent incorrect aggregations.
-* The time dimension tracks activity based on course-relative days instead of standard calendar dates to align with the OULAD dataset.
+* A shared `dim_datetime` is used for both pickup and dropoff timestamps, allowing analysis by hour, day of week, month, season, weekends, and rush-hour periods.
+* Weather data is connected to taxi activity through datetime context so that demand and trip behavior can be analyzed alongside weather conditions.
+
 
 ---
 
@@ -215,3 +217,18 @@ Additional project documentation is available in the `docs/` directory.
 ---
 
 # Project Outcome
+
+The NYC Mobility Data Warehouse and Analytics Pipeline transforms raw taxi, location, and weather data into a structured analytical data warehouse using a **Medallion Architecture and Gold-layer star schema**.
+
+The completed pipeline provides:
+
+* A standardized process for ingesting **NYC Green Taxi, Taxi Zone, and Open-Meteo weather data**.
+* A **Bronze layer** that preserves raw source data and ingestion metadata.
+* A **Silver layer** that cleans, standardizes, validates, and prepares data for analytical modeling.
+* A **Gold layer** containing the `fact_taxi_trip`, `dim_datetime`, `dim_location`, and `dim_weather` tables.
+* Data-quality validation across the Source Inspection, Bronze, Silver, Gold, and Analytics layers.
+* Time-based analysis showing how taxi demand changes by **hour and day of the week**.
+* Geographic analysis showing differences in taxi activity across **NYC boroughs and locations**.
+* Weather analysis comparing taxi demand and trip characteristics under different **weather and precipitation conditions**.
+* A Databricks dashboard that converts the Gold-layer data into business-oriented visualizations.
+
