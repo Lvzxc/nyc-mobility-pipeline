@@ -31,7 +31,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: nyc-mobility-pipeline-${{ github.workflow }}-${{ github.ref }}
@@ -75,9 +74,8 @@ jobs:
     environment: dev
 
     env:
-      DATABRICKS_AUTH_TYPE: github-oidc
-      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
-      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
     steps:
       - name: Check out repository
@@ -101,9 +99,8 @@ jobs:
     environment: prod
 
     env:
-      DATABRICKS_AUTH_TYPE: github-oidc
-      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
-      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
     steps:
       - name: Check out repository
