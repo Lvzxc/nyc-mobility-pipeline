@@ -6,7 +6,7 @@ Built using **Databricks, Delta Lake, Unity Catalog, SQL, and Python**.
 
 ---
 
-Project Overview
+## Project Overview
 
 The pipeline follows a Medallion Architecture to progressively transform raw NYC mobility data into an analytical data warehouse.
 
@@ -54,7 +54,7 @@ The project focuses on:
 * Most trip activity is concentrated in Manhattan, with primary traffic flows extending into Brooklyn and Queens.
 ---
 
-# Pipeline Layers
+## Pipeline Layers
 
 | Layer | Purpose | Key Activities |
 |---|---|---|
@@ -65,17 +65,17 @@ The project focuses on:
 | **Analytics** | Uses Gold data to answer NYC Mobility business questions | Analyzes taxi demand, pickup and dropoff patterns, trip duration and distance, fare activity, rush-hour patterns, location trends, and the relationship between taxi activity and weather |
 ---
 
-# Gold Data Model
+## Gold Data Model
 
 The Gold layer consists of **one fact table** and **three dimensions**.
 
-## Fact Tables
+### Fact Tables
 
 | Fact Table       | Grain                 | Main Measures                                                                              |
 | ---------------- | --------------------- | ------------------------------------------------------------------------------------------ |
 | `fact_taxi_trip` | One row per taxi trip | `passenger_count`, `trip_distance`, `trip_duration_minutes`, `fare_amount`, `total_amount` |
 
-## Dimension Tables
+### Dimension Tables
 
 | Dimension      | Grain                        | Purpose                                       |
 | -------------- | ---------------------------- | --------------------------------------------- |
@@ -85,7 +85,7 @@ The Gold layer consists of **one fact table** and **three dimensions**.
 
 ---
 
-# Star Schema
+## Star Schema
 
 ```text
                          dim_datetime
@@ -100,9 +100,11 @@ The Gold layer consists of **one fact table** and **three dimensions**.
 
 The star schema separates **measurable taxi trip events** in the fact table from **descriptive attributes** in the dimension tables, making the data easier to query and analyze.
 
+![Star schema entity-relationship diagram](doc/star_schema.png)
+
 ---
 
-# Datetime Design
+## Datetime Design
 
 NYC Mobility uses a shared `dim_datetime` that contains both **date and time attributes**.
 
@@ -120,7 +122,7 @@ This allows taxi trips to be compared based on **time of day, day of week, month
 
 ---
 
-# How to Run
+## How to Run
 
 ### Prerequisites
 
@@ -133,14 +135,14 @@ This allows taxi trips to be compared based on **time of day, day of week, month
 
 ### Run Order
 
-### 1. Clone the Repository
+#### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
 cd nyc-mobility
 ```
 
-### 2. Connect the Repository to Databricks
+#### 2. Connect the Repository to Databricks
 
 **In Databricks:**
 
@@ -151,7 +153,7 @@ cd nyc-mobility
 * Select the appropriate branch.
 * Create the Git folder.
 
-### 3. Prepare the NYC Mobility Source Files
+#### 3. Prepare the NYC Mobility Source Files
 
 Place the source data in the configured Databricks Volume:
 
@@ -179,9 +181,22 @@ Green Taxi data is provided as Parquet files, Taxi Zone data as CSV, and weather
 10. Analytics Validation
 ```
 
+### Running Tests
+
+The repository includes `pytest` checks under `tests/` that validate the SQL layers exist and are well-formed.
+
+```bash
+pip install pytest
+pytest tests/ -v
+```
+
+These same checks run automatically in CI (`.github/workflows/ci-cd.yml`) on every pull request and push to `main`/`develop`, which also handles Databricks Bundle deployment to `dev` and `prod`.
+
+---
+
 ## Decisions
 
-The architecture of the pipeline relies on key design decisions to guarantee reliable and scalable data processing. Below is a brief overview; for in-depth documentation, proceed to
+The architecture of the pipeline relies on key design decisions to guarantee reliable and scalable data processing. Below is a brief overview; for in-depth documentation, see [`doc/decisions.md`](doc/decisions.md).
 
 * The pipeline is separated into Source, Bronze, Silver, Gold, and Analytics layers to isolate ingestion, transformation, modeling, and analysis.
 * Delta tables provide reliable storage, allowing for safe reruns and incremental updates without duplicating data.
@@ -195,28 +210,50 @@ The architecture of the pipeline relies on key design decisions to guarantee rel
 
 ## Data Validation
 
-Validation checks are applied at every layer of the pipeline to identify issues early and ensure the final analytics are based on reliable data. Below is a brief overview; for in-depth documentation, proceed to 
+Validation checks are applied at every layer of the pipeline to identify issues early and ensure the final analytics are based on reliable data. Below is a brief overview; for in-depth documentation, see [`doc/data_quality_checks/`](doc/data_quality_checks/).
 
 * Source and Bronze layer checks verify that all expected files are present, not empty, and successfully ingested with the correct columns and row counts.
 * Silver layer checks enforce data quality by verifying required fields, standardizing data types, validating numeric ranges, and removing duplicates.
 * Gold layer checks validate the dimensional model by confirming dimension keys, foreign key relationships, and fact table grain.
 * Analytics layer checks ensure the final output aligns with business rules, maintains the correct analytical grain, and properly handles null values.
-  
+
 ---
 
-# Documentation
+## Documentation
 
-Additional project documentation is available in the `docs/` directory.
+Additional project documentation is available in the `doc/` directory.
 
 | Document | Description |
 |---|---|
-| [`architecture.md`](docs/architecture.md) | Pipeline architecture and data flow |
-| [`data-model.md`](docs/data-model.md) | Gold-layer star schema and table design |
-| [`decisions.md`](docs/decisions.md) | Key technical and data-modeling decisions |
+| [`architecture.md`](doc/architecture.md) | Pipeline architecture and data flow |
+| [`data-model.md`](doc/data-model.md) | Gold-layer star schema and table design |
+| [`decisions.md`](doc/decisions.md) | Key technical and data-modeling decisions |
+| [`sources/`](doc/sources/) | Source schema notes for Green Taxi, Taxi Zones, and Open-Meteo weather data |
+| [`data_quality_checks/`](doc/data_quality_checks/) | Data-quality checks applied at the source, Silver, and Gold layers |
 
 ---
 
-# Project Outcome
+## Project Structure
+
+```text
+.
+├── databricks.yml              # Databricks Asset Bundle definition
+├── resources/                  # Job/pipeline resource definitions (nyc_mobility_job.yml)
+├── src/sql/
+│   ├── 00_setup/                # Schema init, volume creation, source downloads
+│   ├── 01_bronze_ingest/        # Raw ingestion into Bronze Delta tables
+│   ├── 02_silver_clean/         # Cleaning, standardization, deduplication
+│   ├── 03_gold_model/           # fact_taxi_trip and dimension tables
+│   ├── 04_data_quality/         # Source, Silver, and Gold validation checks
+│   └── 05_analytics/            # Business-question analytics queries
+├── tests/                       # pytest checks that validate the SQL layers
+├── doc/                         # Architecture, data model, decisions, and DQ docs
+└── .github/workflows/ci-cd.yml  # CI validation and Databricks Bundle deployment
+```
+
+---
+
+## Project Outcome
 
 The NYC Mobility Data Warehouse and Analytics Pipeline transforms raw taxi, location, and weather data into a structured analytical data warehouse using a **Medallion Architecture and Gold-layer star schema**.
 
@@ -231,4 +268,10 @@ The completed pipeline provides:
 * Geographic analysis showing differences in taxi activity across **NYC boroughs and locations**.
 * Weather analysis comparing taxi demand and trip characteristics under different **weather and precipitation conditions**.
 * A Databricks dashboard that converts the Gold-layer data into business-oriented visualizations.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
 

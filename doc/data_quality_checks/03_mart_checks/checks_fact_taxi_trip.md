@@ -1,8 +1,8 @@
 # Gold Fact Taxi Trip Data Quality Checks
 
-The `nyc.nyc_gold.fact_taxi_trip` table contains one row per Green Taxi trip, modeled as the Gold fact table at the center of the star schema, referencing `dim_datetime`, `dim_location`, and `dim_weather`.
+The `nyc.nyc_gold.fact_taxi_trip` table contains one row per Green Taxi trip, March-April, modeled as the Gold fact table at the center of the star schema, referencing `dim_datetime`, `dim_location`, and `dim_weather`.
 
-These checks validate that the Gold fact table remains complete, unique, referentially consistent with all three dimensions, within valid value ranges, and traceable to its Silver source.
+These data checks validate that the Gold fact table remains complete, unique, referentially consistent with all three dimensions, within valid value ranges, and traceable to its Silver source.
 
 | *Check* | *Purpose* | *What is Checked* | *Expected Result* |
 | ----- | ----- | ----- | ----- |
